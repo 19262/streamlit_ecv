@@ -16,16 +16,31 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pyreadstat
 from datetime import datetime
-import warnings
+from PIL import Image as PILImage
+import warnings, os
 
 warnings.filterwarnings("ignore")
+
+# Favicon
+_favicon = None
+_logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "favicon.png")
+if os.path.exists(_logo_path):
+    _favicon = PILImage.open(_logo_path)
+
+# Logo en base64 pour header + sidebar
+import base64 as _b64
+_logo_b64 = ""
+_logo_full_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ente_logo.png")
+if os.path.exists(_logo_full_path):
+    with open(_logo_full_path, "rb") as _f:
+        _logo_b64 = _b64.b64encode(_f.read()).decode()
 
 # =============================================================================
 # CONFIG
 # =============================================================================
 st.set_page_config(
     page_title="ENTE - Contrôle Qualité",
-    page_icon="📊",
+    page_icon=_favicon or "📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -129,17 +144,17 @@ st.markdown("""
 }
 
 [data-testid="stSidebar"] {
-  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+  background: linear-gradient(180deg, #FAF6F0 0%, #F3EDE4 100%);
   box-shadow: var(--shadow-lg);
 }
 [data-testid="stSidebar"] .stMarkdown,
 [data-testid="stSidebar"] label {
-  color: rgba(255,255,255,0.95) !important;
+  color: #2D2B28 !important;
 }
 [data-testid="stSidebar"] h1,
 [data-testid="stSidebar"] h2,
 [data-testid="stSidebar"] h3 {
-  color: white !important;
+  color: #1A1816 !important;
   font-weight: 700 !important;
 }
 
@@ -542,7 +557,9 @@ def calculate_employment_indicators(df: pd.DataFrame) -> pd.DataFrame:
 # SIDEBAR — Import unique avec persistance session_state
 # =============================================================================
 with st.sidebar:
-    st.markdown("### 📊 ENTE - Contrôle Qualité")
+    if _logo_b64:
+        st.markdown(f'<img src="data:image/png;base64,{_logo_b64}" style="height:50px; border-radius:6px; background:rgba(255,255,255,0.85); padding:4px; margin-bottom:0.5rem;">', unsafe_allow_html=True)
+    st.markdown("### ENTE - Contrôle Qualité")
     st.markdown("**ANSADE -- Mauritanie**")
     st.markdown("---")
 
@@ -597,9 +614,10 @@ with st.sidebar:
 # =============================================================================
 # HEADER
 # =============================================================================
-st.markdown("""
+st.markdown(f"""
 <div class="header">
-  <h1>📊 ENTE - Contrôle Qualité</h1>
+  {'<img src="data:image/png;base64,' + _logo_b64 + '" style="height:70px; margin-bottom:0.5rem; border-radius:8px; background:rgba(255,255,255,0.9); padding:6px;">' if _logo_b64 else ''}
+  <h1>ENTE - Contrôle Qualité</h1>
   <p>Enquête Nationale Trimesterielle sur l'Emploi - ENTE 2026</p>
 </div>
 """, unsafe_allow_html=True)
@@ -1682,7 +1700,7 @@ st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
             border-radius: 12px; color: white;">
-    <h3 style="margin: 0;">📊 Dashboard ENTE v2.1</h3>
+    <h3 style="margin: 0;">Dashboard ENTE v2.1</h3>
     <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">© 2026 ANSADE -- Mauritanie - Développé avec Streamlit</p>
 </div>
 """, unsafe_allow_html=True)
