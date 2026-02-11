@@ -554,11 +554,6 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # ═══════════════════════════════════════════════════════════════════
-    # IMPORTATION PERSISTANTE — Les deux uploaders sont TOUJOURS visibles
-    # Les données sont stockées dans session_state une seule fois
-    # ═══════════════════════════════════════════════════════════════════
-
     st.markdown("**📂 Bases de données**")
 
     # --- Base Ménage ---
@@ -903,6 +898,100 @@ elif module == "💼 Emploi":
                     }),
                     use_container_width=True,
                     height=400
+                )
+
+            # ─────────────────────────────────────────────────────
+            # Tableau Indicateurs par Enquêteur
+            # ─────────────────────────────────────────────────────
+            if "I11" in df_age.columns and len(df_age) > 0:
+                st.markdown("---")
+                st.markdown("### 🧑‍💼 Indicateurs par Enquêteur")
+
+                indic_enqueteur = df_age.groupby(["I10", "I11"]).agg(
+                    Effectif=("IND1", "count"),
+                    t_part=("t_part", "mean"),
+                    r_emploi=("r_emploi", "mean"),
+                    t_chomage=("t_chomage", "mean"),
+                ).reset_index().sort_values(["I10", "I11"])
+
+                indic_enqueteur["Nom Équipe"] = indic_enqueteur["I10"].apply(lambda x: get_label_equipe(x))
+                indic_enqueteur["Nom Enquêteur"] = indic_enqueteur["I11"].apply(lambda x: get_label_enqueteur(x))
+
+                display_enq = indic_enqueteur.rename(columns={
+                    "I10": "Code Éq.",
+                    "I11": "Code Enq.",
+                    "t_part": "Taux Part.",
+                    "r_emploi": "Ratio Emploi",
+                    "t_chomage": "Taux Chômage",
+                })
+
+                for col in ["Taux Part.", "Ratio Emploi", "Taux Chômage"]:
+                    if col in display_enq.columns:
+                        display_enq[col] = display_enq[col].round(1)
+
+                cols_enq = [
+                    "Code Éq.", "Nom Équipe", "Code Enq.", "Nom Enquêteur",
+                    "Effectif", "Taux Part.", "Ratio Emploi", "Taux Chômage"
+                ]
+                cols_enq = [c for c in cols_enq if c in display_enq.columns]
+
+                # Graphique par enquêteur
+                top20_enq = indic_enqueteur.sort_values("Effectif", ascending=False).head(20).copy()
+                top20_enq["label"] = top20_enq.apply(
+                    lambda x: f"Éq.{int(x['I10'])} - {get_label_enqueteur(x['I11']).split(' ')[0]} ({int(x['I11'])})", axis=1
+                )
+
+                fig = go.Figure()
+                fig.add_trace(go.Bar(name="Taux Part.", x=top20_enq["label"], y=top20_enq["t_part"], marker_color="#667eea"))
+                fig.add_trace(go.Bar(name="Ratio Emploi", x=top20_enq["label"], y=top20_enq["r_emploi"], marker_color="#10b981"))
+                fig.add_trace(go.Bar(name="Taux Chômage", x=top20_enq["label"], y=top20_enq["t_chomage"], marker_color="#f59e0b"))
+                fig.update_layout(
+                    barmode="group", height=450,
+                    xaxis_title="", yaxis_title="Taux (%)",
+                    xaxis_tickangle=-45,
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Tableau avec recherche
+                df_enq_display = display_searchable_dataframe(
+                    display_enq[cols_enq],
+                    key_suffix="enqueteurs_indic_tab1",
+                    height=450
+                )
+
+                def style_chomage_enq(row):
+                    tc = row.get("Taux Chômage", 0)
+                    if tc > 30:
+                        return ['background-color: #fee2e2'] * len(row)
+                    elif tc > 20:
+                        return ['background-color: #fed7aa'] * len(row)
+                    return [''] * len(row)
+
+                styled_enq = df_enq_display.style.apply(style_chomage_enq, axis=1)
+
+                fmt_enq = {
+                    "Code Éq.": "{:.0f}", "Code Enq.": "{:.0f}",
+                    "Effectif": "{:.0f}",
+                    "Taux Part.": "{:.1f}", "Ratio Emploi": "{:.1f}",
+                    "Taux Chômage": "{:.1f}"
+                }
+                fmt_enq = {k: v for k, v in fmt_enq.items() if k in cols_enq}
+
+                st.dataframe(
+                    styled_enq.format(fmt_enq),
+                    use_container_width=True,
+                    height=450
+                )
+
+                # Export CSV
+                csv_enq = display_enq[cols_enq].to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="📥 Télécharger Indicateurs par Enquêteur (CSV)",
+                    data=csv_enq,
+                    file_name=f"indicateurs_enqueteurs_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                    mime="text/csv",
+                    key="dl_enqueteurs_indic"
                 )
 
         with tab2:
