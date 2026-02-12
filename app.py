@@ -1842,7 +1842,7 @@ st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
             border-radius: 12px; color: white;">
-    <h3 style="margin: 0;">Dashboard ENTE v2.1</h3>
+    <h3 style="margin: 0;">Dashboard ENTE </h3>
     <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">© 2026 ANSADE -- Mauritanie - Développé avec Streamlit</p>
 </div>
 """, unsafe_allow_html=True)
