@@ -707,7 +707,7 @@ if module == "📋 Exhaustivité":
                 fig.update_layout(height=400, showlegend=False,
                                   xaxis_title="Nombre de Ménages", yaxis_title="Équipe",
                                   yaxis={'categoryorder': 'total ascending'})
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
 
             with col2:
                 st.markdown("### Grappes par Équipe")
@@ -721,7 +721,7 @@ if module == "📋 Exhaustivité":
                 fig.update_layout(height=400, showlegend=False,
                                   xaxis_title="Nombre de Grappes", yaxis_title="Équipe",
                                   yaxis={'categoryorder': 'total ascending'})
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
 
             st.markdown("### Distribution des Ménages par Grappe")
             fig = px.histogram(stats_grappes, x="nb_menages", nbins=30,
@@ -729,7 +729,7 @@ if module == "📋 Exhaustivité":
             fig.add_vline(x=15, line_dash="dash", line_color="#ef4444", line_width=2,
                           annotation_text="Seuil: 15", annotation_position="top right")
             fig.update_layout(height=350, xaxis_title="Nombre de Ménages", yaxis_title="Fréquence", bargap=0.1)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
 
         with tab2:
             st.markdown("### Récapitulatif par Équipe")
@@ -746,7 +746,7 @@ if module == "📋 Exhaustivité":
                 display_equipes[["Code", "Nom", "Ménages", "Grappes", "Doublons", "Moy/Grappe"]],
                 key_suffix="equipes_tab2"
             )
-            st.dataframe(df_to_display, use_container_width=True, height=450)
+            st.dataframe(df_to_display, width='stretch', height=450)
 
         with tab3:
             nb_incomp = int((stats_grappes["nb_menages"] < 15).sum())
@@ -777,7 +777,7 @@ if module == "📋 Exhaustivité":
 
             df_to_display = display_searchable_dataframe(display_grappes, key_suffix="grappes_tab3", height=500)
             st.dataframe(df_to_display.style.applymap(color_status, subset=["Statut"]),
-                         use_container_width=True, height=500)
+                         width='stretch', height=500)
 
         with tab4:
             if len(doublons) == 0:
@@ -792,7 +792,7 @@ if module == "📋 Exhaustivité":
                     df_to_display.style.format({
                         "I1": "{:.0f}", "I2": "{:.0f}", "I10": "{:.0f}", "I11": "{:.0f}", "nb_doublons": "{:.0f}"
                     }),
-                    use_container_width=True,
+                    width='stretch',
                     height=500
                 )
 
@@ -891,7 +891,7 @@ elif module == "💼 Emploi":
                     xaxis_title="Équipe", yaxis_title="Taux (%)",
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
 
                 display_indic = indic_equipe.copy()
                 display_indic["Nom"] = display_indic["I10"].apply(lambda x: get_label_equipe(x))
@@ -914,7 +914,7 @@ elif module == "💼 Emploi":
                         "Ratio Emploi": "{:.1f}",
                         "Taux Chômage": "{:.1f}"
                     }),
-                    use_container_width=True,
+                    width='stretch',
                     height=400
                 )
 
@@ -969,7 +969,7 @@ elif module == "💼 Emploi":
                     xaxis_tickangle=-45,
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
 
                 # Tableau avec recherche
                 df_enq_display = display_searchable_dataframe(
@@ -998,7 +998,7 @@ elif module == "💼 Emploi":
 
                 st.dataframe(
                     styled_enq.format(fmt_enq),
-                    use_container_width=True,
+                    width='stretch',
                     height=450
                 )
 
@@ -1136,7 +1136,7 @@ elif module == "💼 Emploi":
                             "% < 10 min": "{:.1f}",
                             "Moy.": "{:.1f}"
                         }),
-                        use_container_width=True,
+                        width='stretch',
                         height=420
                     )
 
@@ -1166,7 +1166,7 @@ elif module == "💼 Emploi":
                     )
                     fig.add_vline(x=30, line_dash="dash", line_color="#ef4444", line_width=2,
                                   annotation_text="Seuil: 30%", annotation_position="top right")
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
 
                     st.markdown("---")
                     csv_men = display_men_final.to_csv(index=False).encode('utf-8')
@@ -1243,7 +1243,7 @@ elif module == "💼 Emploi":
                             "% ≤ 5 min": "{:.1f}",
                             "Moy.": "{:.1f}"
                         }),
-                        use_container_width=True,
+                        width='stretch',
                         height=420
                     )
 
@@ -1273,7 +1273,7 @@ elif module == "💼 Emploi":
                     )
                     fig.add_vline(x=30, line_dash="dash", line_color="#ef4444", line_width=2,
                                   annotation_text="Seuil: 30%", annotation_position="top right")
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
 
                     st.markdown("---")
                     csv_emp = display_emp_final.to_csv(index=False).encode('utf-8')
@@ -1299,7 +1299,7 @@ elif module == "💼 Emploi":
                         fig.add_vline(x=10, line_dash="dash", line_color="#ef4444", line_width=2,
                                       annotation_text="< 10 min", annotation_position="top right")
                         fig.update_layout(height=350, xaxis_title="Durée (minutes)", yaxis_title="Fréquence", showlegend=False)
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width='stretch')
 
                 with col2:
                     if len(occ) > 0 and "dur_ind_min" in occ.columns and occ["dur_ind_min"].notna().any():
@@ -1310,7 +1310,7 @@ elif module == "💼 Emploi":
                         fig.add_vline(x=5, line_dash="dash", line_color="#ef4444", line_width=2,
                                       annotation_text="≤ 5 min", annotation_position="top right")
                         fig.update_layout(height=350, xaxis_title="Durée (minutes)", yaxis_title="Fréquence", showlegend=False)
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width='stretch')
 
         with tab3:
             if "AP2A" in df.columns or "AP2AC1" in df.columns:
@@ -1332,7 +1332,149 @@ elif module == "💼 Emploi":
                     fig = px.bar(top, x="Effectif", y="Branche", orientation="h",
                                  color="Effectif", color_continuous_scale="Oranges")
                     fig.update_layout(height=500, showlegend=False, yaxis={'categoryorder': 'total ascending'})
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
+
+                # ─────────────────────────────────────────────────────
+                # Tableau détaillé par individu (AP3 >= 1)
+                # ─────────────────────────────────────────────────────
+                st.markdown("---")
+                st.markdown("### 📋 Détail des Branches d'Activité par Individu")
+
+                # Labels AP2AC1
+                LABELS_AP2AC1 = {
+                    "A01001": "Cultures de céréales", "A01002": "Culture de légumes frais",
+                    "A01003": "Culture de fruits", "A01004": "Autres cultures",
+                    "A01005": "Activités de soutien à la culture",
+                    "A02001": "Élevage d'animaux sur pieds", "A02002": "Élevage de volailles",
+                    "A02003": "Autres activités liées à l'élevage",
+                    "A03000": "Sylviculture, Exploitation forestière et Cueillette",
+                    "A04000": "Pêche, pisciculture et aquaculture",
+                    "B05001": "Extraction de pétrole brut et de gaz naturel",
+                    "B05002": "Extraction de minerais de fer",
+                    "B05003": "Extraction d'autres minerais métalliques non ferreux",
+                    "B05004": "Autres activités extractives",
+                    "B05005": "Activités de soutien aux industries extractives",
+                    "C06001": "Abattage, transformation et conservation des viandes",
+                    "C06002": "Transformation, conservation de poissons",
+                    "C06003": "Fabrication de produits laitiers et de glaces",
+                    "C06004": "Travail des grains, Fabrication de produits amylacés",
+                    "C06005": "Fabrication de produits alimentaires à base de céréales",
+                    "C06006": "Fabrication de boissons",
+                    "C06007": "Autres industries agroalimentaires",
+                    "C07001": "Fabrication de textile et d'articles d'habillement",
+                    "C07002": "Travail du cuir, fabrication de chaussures",
+                    "C07003": "Fabrication d'articles en bois, liège et sparterie",
+                    "C07004": "Fabrication de papiers, cartons",
+                    "C07005": "Imprimerie et enregistrements sonores",
+                    "C07006": "Raffinage pétrolier et cokéfaction",
+                    "C07007": "Fabrication de produits chimiques, caoutchouc, plastique",
+                    "C07008": "Fabrication de ciment, verre, matériaux de construction",
+                    "C07009": "Métallurgie et fonderie, ouvrages en métaux",
+                    "C07010": "Fabrication de machines, appareils électriques",
+                    "C07011": "Autres activités manufacturières n.c.a.",
+                    "C07012": "Réparation et installation de machines",
+                    "D08000": "Production et distribution d'électricité et de gaz",
+                    "E08001": "Captage, traitement et distribution d'eau",
+                    "E08002": "Assainissement, traitement des déchets",
+                    "F09001": "Construction de bâtiments",
+                    "F09002": "Travaux de génie civil",
+                    "F09003": "Activités spécialisées de construction",
+                    "G10001": "Commerce",
+                    "G10002": "Entretien et réparation de véhicules",
+                    "H11001": "Transports ferroviaires", "H11002": "Transports routiers",
+                    "H11003": "Autres transports terrestres",
+                    "H11004": "Transports maritimes et fluviales",
+                    "H11005": "Transports aériens",
+                    "H11006": "Entreposages et auxiliaires de transport",
+                    "H11007": "Activités de poste et de courrier",
+                    "I11000": "Activités de restauration et d'hébergement",
+                    "J11001": "Télécommunications",
+                    "J11002": "Autres activités d'information et de communication",
+                    "K12001": "Activités de banque centrale",
+                    "K12002": "Activités financières",
+                    "K12003": "Activités d'assurance",
+                    "K12004": "Activités d'auxiliaires financiers et d'assurance",
+                    "L13000": "Activités immobilières",
+                    "M13000": "Activités spécialisées, scientifiques et techniques",
+                    "N13000": "Activités de soutien et de bureau",
+                    "O14001": "Administration générale, économique, sociale",
+                    "O14002": "Sécurité sociale obligatoire",
+                    "P15000": "Enseignement",
+                    "Q16000": "Santé humaine et action sociale",
+                    "R17000": "Activités artistiques, spectacle et récréatives",
+                    "S17001": "Activités des organisations associatives",
+                    "S17002": "Réparation d'ordinateurs et articles personnels",
+                    "S17003": "Autres activités de service personnels n.c.a.",
+                    "T17000": "Activités des ménages employeurs de personnel domestique",
+                    "U19000": "Correction territoriale",
+                }
+
+                # Filtre AP3 >= 1
+                br_ap3 = br.copy()
+                if "AP3" in br_ap3.columns:
+                    br_ap3["AP3_num"] = pd.to_numeric(br_ap3["AP3"], errors="coerce")
+                    br_ap3 = br_ap3[br_ap3["AP3_num"] >= 1]
+                    st.caption(f"🔎 Filtre : AP3 ≥ 1 → **{len(br_ap3):,}** individus occupés")
+                else:
+                    st.caption(f"📊 **{len(br_ap3):,}** individus occupés")
+
+                if len(br_ap3) > 0:
+                    # Construction du tableau
+                    display_br = br_ap3.copy()
+
+                    # Label branche
+                    if "AP2AC1" in display_br.columns:
+                        display_br["Libellé Branche"] = display_br["AP2AC1"].astype(str).map(LABELS_AP2AC1).fillna("—")
+
+                    # Nom équipe / enquêteur
+                    if "I10" in display_br.columns:
+                        display_br["Nom Équipe"] = display_br["I10"].apply(lambda x: get_label_equipe(x) if pd.notna(x) else "")
+                    if "I11" in display_br.columns:
+                        display_br["Nom Enquêteur"] = display_br["I11"].apply(lambda x: get_label_enqueteur(x) if pd.notna(x) else "")
+
+                    # Colonnes à afficher
+                    cols_br = []
+                    for c in ["idmen", "idind", "I10", "Nom Équipe", "I11", "Nom Enquêteur", "AP2A", "AP2AC1", "Libellé Branche", "AP2AC"]:
+                        if c in display_br.columns:
+                            cols_br.append(c)
+
+                    display_br_final = display_br[cols_br].rename(columns={
+                        "idmen": "ID Ménage",
+                        "idind": "ID Individu",
+                        "I10": "Équipe",
+                        "I11": "Enquêteur",
+                        "AP2A": "Branche",
+                        "AP2AC1": "Code Activité",
+                        "AP2AC": "AP2AC",
+                    })
+
+                    df_br_display = display_searchable_dataframe(
+                        display_br_final,
+                        key_suffix="branches_detail",
+                        height=500
+                    )
+
+                    fmt_br = {}
+                    for c in ["Équipe", "Enquêteur"]:
+                        if c in display_br_final.columns:
+                            fmt_br[c] = "{:.0f}"
+
+                    if fmt_br:
+                        st.dataframe(df_br_display.style.format(fmt_br), width='stretch', height=500)
+                    else:
+                        st.dataframe(df_br_display, width='stretch', height=500)
+
+                    # Export CSV
+                    csv_br = display_br_final.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="📥 Télécharger Détail Branches (CSV)",
+                        data=csv_br,
+                        file_name=f"detail_branches_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                        mime="text/csv",
+                        key="dl_branches_detail"
+                    )
+                else:
+                    st.info("ℹ️ Aucun individu avec AP3 ≥ 1")
 
         with tab4:
             if "strate_label" in df.columns and len(df_age) > 0:
@@ -1355,7 +1497,7 @@ elif module == "💼 Emploi":
                              barmode="group",
                              color_discrete_map={"t_part": "#667eea", "r_emploi": "#10b981", "t_chomage": "#f59e0b"})
                 fig.update_layout(height=400, xaxis_tickangle=-30, xaxis_title="Strate", yaxis_title="Taux (%)")
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
             
             if "wilaya_label" in df.columns and len(df_age) > 0:
                 st.markdown("---")
@@ -1401,7 +1543,7 @@ elif module == "💼 Emploi":
                         x=1
                     )
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
                 
                 st.markdown("---")
                 st.markdown("### 📋 Tableau Détaillé par Wilaya")
@@ -1431,7 +1573,7 @@ elif module == "💼 Emploi":
                         "Ratio Emploi": "{:.1f}",
                         "Taux Chômage": "{:.1f}"
                     }),
-                    use_container_width=True,
+                    width='stretch',
                     height=400
                 )
 
@@ -1504,7 +1646,7 @@ elif module == "📊 Vue Consolidée":
                         xaxis_title="Nombre de Ménages",
                         yaxis_title="Équipe"
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                 
                 with col2:
                     st.markdown("#### Grappes Visitées")
@@ -1525,7 +1667,7 @@ elif module == "📊 Vue Consolidée":
                         xaxis_title="Nombre de Grappes",
                         yaxis_title="Équipe"
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                 
                 st.markdown("---")
                 st.markdown("### 📋 Récapitulatif Détaillé par Équipe")
@@ -1536,7 +1678,7 @@ elif module == "📊 Vue Consolidée":
                     stats_equipes[["Code", "Nom", "Ménages", "Grappes", "Moy/Grappe"]],
                     key_suffix="consolidé_equipes"
                 )
-                st.dataframe(df_to_display, use_container_width=True, height=400)
+                st.dataframe(df_to_display, width='stretch', height=400)
 
         with tab2:
             st.markdown("### Indicateurs d'Emploi Consolidés")
@@ -1568,7 +1710,7 @@ elif module == "📊 Vue Consolidée":
                         paper_bgcolor="rgba(0,0,0,0)",
                         font={'family': "Inter"}
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                 
                 with col2:
                     fig = go.Figure(go.Indicator(
@@ -1591,7 +1733,7 @@ elif module == "📊 Vue Consolidée":
                         paper_bgcolor="rgba(0,0,0,0)",
                         font={'family': "Inter"}
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                 
                 with col3:
                     fig = go.Figure(go.Indicator(
@@ -1614,7 +1756,7 @@ elif module == "📊 Vue Consolidée":
                         paper_bgcolor="rgba(0,0,0,0)",
                         font={'family': "Inter"}
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                 
                 if "I10" in df_age.columns:
                     st.markdown("---")
@@ -1660,7 +1802,7 @@ elif module == "📊 Vue Consolidée":
                             x=1
                         )
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                     
                     st.markdown("---")
                     display_indic = indic_equipe.copy()
@@ -1689,7 +1831,7 @@ elif module == "📊 Vue Consolidée":
                             "Ratio Emploi": "{:.1f}",
                             "Taux Chômage": "{:.1f}"
                         }),
-                        use_container_width=True,
+                        width='stretch',
                         height=400
                     )
 
