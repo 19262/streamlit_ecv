@@ -56,6 +56,8 @@ if "menage_filename" not in st.session_state:
     st.session_state.menage_filename = None
 if "emploi_filename" not in st.session_state:
     st.session_state.emploi_filename = None
+if "active_module" not in st.session_state:
+    st.session_state.active_module = "exhaustivite"
 
 # =============================================================================
 # CSS ULTRA PREMIUM OPTIMISÉ
@@ -271,6 +273,35 @@ st.markdown("""
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary) 100%);
 }
+
+/* Sidebar navigation buttons */
+[data-testid="stSidebar"] [data-testid="stButton"] button {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  padding: 14px 16px !important;
+  line-height: 1.3 !important;
+  transition: all 0.25s ease !important;
+  text-align: left !important;
+  margin-bottom: 4px !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"] {
+  background: rgba(255,255,255,0.65) !important;
+  color: #4a4540 !important;
+  border: 2px solid rgba(0,0,0,0.08) !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="secondary"]:hover {
+  background: rgba(255,255,255,0.95) !important;
+  border-color: var(--primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2) !important;
+}
+[data-testid="stSidebar"] [data-testid="stButton"] button[kind="primary"] {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -278,59 +309,59 @@ st.markdown("""
 # LABELS ET DICTIONNAIRES
 # =============================================================================
 LABELS_EQUIPES = {
-    100: "Taleb Sedigh Cheikh Mohamdy Jeddou",
-    200: "Sid El Moctar Sidi Mahamoud Ahmed Sidi",
-    300: "El moustapha Aboubecrine el Hafedh",
-    400: "Mahmoud Abderrahime Dia",
-    500: "Sidi Mohamed Boune",
-    600: "Amadou Adama Ly",
-    700: "Ahmed Banné Messoud",
-    800: "Mohamed Salem Ahmed Bezeid Mokhtareiny",
+    100: "Sidi Mohamed Boune",
+    200: "Oumar Biye Salime",
+    300: "Ahmed talib ahmed sidi",
+    400: "Mohamed Vadhel Seydou Camara",
+    500: "El moustapha Aboubecrine el Hafedh",
+    600: "Mahmoud Abderrahime Dia",
+    700: "Mohamed Yeslem Elkebir",
+    800: "Mohamed Vadel Mohamed El Mouktar Elella",
     900: "Mamadou Ousmane Ba",
-    1000: "Mohamed Vadel Mohamed El Mouktar Elella"
+    1000: "Mohamed Salem Ahmed  Bezeid Mokhtareiny"
 }
 
 LABELS_ENQUETEURS = {
-    100: "Taleb Sedigh Cheikh Mohamdy Jeddou",
+    100: "Sidi Mohamed Boune",
     101: "El Hassen Mohamed Yeslem Boubekar",
-    102: "Mohamed Yeslem Elkebir",
-    103: "Amadou Abdoulaye Ba",
-    200: "Sid El Moctar Sidi Mahamoud Ahmed Sidi",
+    102: "Taleb Sedigh Cheikh Mohamdy Jeddou",
+    103: "Brahim Mohamed Mbarek",
+    200: "Oumar Biye Salime",
     201: "Mohamedou saleck limam",
     202: "El Bou Mouhamed El Mokhtar Ameirine",
-    203: "Aly Abdel kader",
-    300: "El moustapha Aboubecrine el Hafedh",
-    301: "Sidi Dedd Salim Ahmed Mbadi",
-    302: "Ahmed Aboubecrine El Atighe",
-    303: "Abdellahi Mohamed Taleb Ahmed",
-    400: "Mahmoud Abderrahime Dia",
-    401: "Ibrahime Boubou Dia",
-    402: "Brahim Mohamed Mbarek",
-    403: "Mohamed Vadhel Seydou Camara",
-    500: "Sidi Mohamed Boune",
+    203: "Sidi Dedd Salim Ahmed Mbadi",
+    300: "Ahmed talib ahmed sidi",
+    301: "Elhassen Oumar Ba",
+    302: "Limame Malick mohamed Boushab",
+    303: "Aly Abdel kader",
+    400: "Mohamed Vadhel Seydou Camara",
+    401: "Bocar souleymane sy",
+    402: "Brahim Mohamed Mahmoud Sidi Haiballa",
+    403: "Amadou Abdoulaye Ba",
+    500: "El moustapha Aboubecrine el Hafedh",
     501: "Kemal Mohamed Abdellahi Bouje",
-    502: "Limame Malick mohamed Boushab",
+    502: "Ahmed Banné Messoud",
     503: "Mouhamadou Alassane ba",
-    600: "Amadou Adama Ly",
-    601: "Sid Ahmed El Hacen Bilal loubek",
-    602: "Abou kalidou N'Gaide",
-    603: "Mohamed Lemine Deddaha",
-    700: "Ahmed Banné Messoud",
-    701: "Mohamed El Gewth",
-    702: "Oumar Biye Salime",
-    703: "Mohamed El Moctar El Yass",
-    800: "Mohamed Salem Ahmed Bezeid Mokhtareiny",
-    801: "Brahim Mohamed Mahmoud Sidi Haiballa",
-    802: "Ahmed talib ahmed sidi",
-    803: "Elhassen Oumar Ba",
+    600: "Mahmoud Abderrahime Dia",
+    601: "Mohamed El Moctar El Yass",
+    602: "Ahmed Aboubecrine El Atighe",
+    603: "Abou kalidou N'Gaide",
+    700: "Mohamed Yeslem Elkebir",
+    701: "Mohamed Lemine Deddaha",
+    702: "Mohamed El Gewth",
+    703: "Sid El Moctar Sidi Mahamoud Ahmed Sidi",
+    800: "Mohamed Vadel Mohamed El Mouktar Elella",
+    801: "Dah Belkheir Bewbe",
+    802: "Ibrahime Boubou Dia",
+    803: "Abdellahi Mohamed Taleb Ahmed",
     900: "Mamadou Ousmane Ba",
-    901: "Sidi Mohamed Mohamed Sidi Aly",
-    902: "Dah Belkheir Bewbe",
-    903: "Bocar souleymane sy",
-    1000: "Mohamed Vadel Mohamed El Mouktar Elella",
-    1001: "Demba Abdoul Ba",
-    1002: "Mohamed lemine Mohemed oumar",
-    1003: "Imam cheikh ahmed baba cheikh"
+    901: "Mohamed lemine Mohemed oumar",
+    902: "Sid Ahmed El Hacen Bilal loubek",
+    903: "Amadou Adama Ly",
+    1000: "Mohamed Salem Ahmed Bezeid Mokhtareiny",
+    1001: "Imam cheikh ahmed baba cheikh",
+    1002: "Sidi Mohamed Mohamed Sidi Aly",
+    1003: "Demba Abdoul Ba"
 }
 
 def get_label_equipe(code):
@@ -563,11 +594,33 @@ with st.sidebar:
     st.markdown("**ANSADE -- Mauritanie**")
     st.markdown("---")
 
-    module = st.radio(
-        "**Module d'analyse**",
-        ["📋 Exhaustivité", "💼 Emploi", "📊 Vue Consolidée"],
-        help="Sélectionnez le module souhaité"
-    )
+    # ═══════════════════════════════════════════════════════════════════
+    # Navigation par boutons stylisés
+    # ═══════════════════════════════════════════════════════════════════
+    st.markdown("**Module d'analyse**")
+
+    MODULES = {
+        "exhaustivite": {"label": "Exhaustivité", "icon": "📋", "color": "#3b82f6"},
+        "emploi": {"label": "Emploi", "icon": "💼", "color": "#10b981"},
+        "consolide": {"label": "Vue Consolidée", "icon": "📊", "color": "#8b5cf6"},
+    }
+
+    for key, m in MODULES.items():
+        is_active = st.session_state.active_module == key
+        if st.button(
+            f"{m['icon']}  {m['label']}",
+            key=f"nav_{key}",
+            use_container_width=True,
+            type="primary" if is_active else "secondary"
+        ):
+            st.session_state.active_module = key
+            st.rerun()
+
+    module = {
+        "exhaustivite": "📋 Exhaustivité",
+        "emploi": "💼 Emploi",
+        "consolide": "📊 Vue Consolidée",
+    }[st.session_state.active_module]
 
     st.markdown("---")
 
@@ -1335,7 +1388,7 @@ elif module == "💼 Emploi":
                     st.plotly_chart(fig, width='stretch')
 
                 # ─────────────────────────────────────────────────────
-                # Tableau détaillé par individu (AP3 >= 1)
+                # Tableau détaillé par individu (Occupés)
                 # ─────────────────────────────────────────────────────
                 st.markdown("---")
                 st.markdown("### 📋 Détail des Branches d'Activité par Individu")
@@ -1409,14 +1462,9 @@ elif module == "💼 Emploi":
                     "U19000": "Correction territoriale",
                 }
 
-                # Filtre AP3 >= 1
+                # br est déjà filtré sur Occupe == 1
                 br_ap3 = br.copy()
-                if "AP3" in br_ap3.columns:
-                    br_ap3["AP3_num"] = pd.to_numeric(br_ap3["AP3"], errors="coerce")
-                    br_ap3 = br_ap3[br_ap3["AP3_num"] >= 1]
-                    st.caption(f"🔎 Filtre : AP3 ≥ 1 → **{len(br_ap3):,}** individus occupés")
-                else:
-                    st.caption(f"📊 **{len(br_ap3):,}** individus occupés")
+                st.caption(f"🔎 Filtre : Occupé = 1 → **{len(br_ap3):,}** individus occupés")
 
                 if len(br_ap3) > 0:
                     # Construction du tableau
@@ -1474,7 +1522,7 @@ elif module == "💼 Emploi":
                         key="dl_branches_detail"
                     )
                 else:
-                    st.info("ℹ️ Aucun individu avec AP3 ≥ 1")
+                    st.info("ℹ️ Aucun individu occupé")
 
         with tab4:
             if "strate_label" in df.columns and len(df_age) > 0:
