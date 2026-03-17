@@ -1015,12 +1015,61 @@ if module == "📋 Exhaustivité":
                 "nb_doublons": "Doublons", "Moy_menages": "Moy/Grappe"
             })
             display_equipes["Code"] = display_equipes["Code"].apply(lambda x: f"{int(x)}" if pd.notna(x) else "")
-            
+
             df_to_display = display_searchable_dataframe(
                 display_equipes[["Code", "Nom", "Ménages", "Grappes", "Doublons", "Moy/Grappe"]],
                 key_suffix="equipes_tab2"
             )
-            st.dataframe(df_to_display, width='stretch', height=450)
+            st.dataframe(df_to_display, width='stretch', height=400)
+
+            # ── Tableau ménages par enquêteur avec taux de contribution ──
+            st.markdown("---")
+            st.markdown("### 📋 Ménages réalisés par Enquêteur et contribution au sein de l'Équipe")
+
+            if "I11" in df.columns:
+                stats_enq = df.groupby(["I10", "I11"]).agg(
+                    Ménages=("I2", "count")
+                ).reset_index()
+
+                total_equipe = stats_enq.groupby("I10")["Ménages"].transform("sum")
+                stats_enq["% dans l'Équipe"] = (stats_enq["Ménages"] / total_equipe * 100).round(1)
+                stats_enq["Nom Équipe"]    = stats_enq["I10"].apply(lambda x: get_label_equipe(x))
+                stats_enq["Nom Enquêteur"] = stats_enq["I11"].apply(lambda x: get_label_enqueteur(x))
+                stats_enq = stats_enq.sort_values(["I10", "I11"], ascending=True)
+
+                display_enq = stats_enq.rename(columns={"I10": "Code Éq.", "I11": "Code Enq."})
+                display_enq = display_enq[["Code Éq.", "Nom Équipe", "Code Enq.", "Nom Enquêteur", "Ménages", "% dans l'Équipe"]]
+
+                df_enq_display = display_searchable_dataframe(display_enq, key_suffix="enq_menages_tab2", height=450)
+
+                def style_contribution(row):
+                    v = row["% dans l'Équipe"]
+                    if v >= 40:
+                        return ['background-color:#dbeafe; font-weight:600'] * len(row)
+                    elif v <= 15:
+                        return ['background-color:#fef3c7'] * len(row)
+                    return [''] * len(row)
+
+                st.dataframe(
+                    df_enq_display.style.apply(style_contribution, axis=1).format({
+                        "Code Éq.":  "{:.0f}",
+                        "Code Enq.": "{:.0f}",
+                        "Ménages":   "{:.0f}",
+                        "% dans l'Équipe": "{:.1f}",
+                    }),
+                    width='stretch', height=450
+                )
+
+                csv_enq = display_enq.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="📥 Télécharger Ménages par Enquêteur (CSV)",
+                    data=csv_enq,
+                    file_name=f"menages_enqueteurs_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+                    mime="text/csv",
+                    key="dl_enq_menages"
+                )
+            else:
+                st.info("ℹ️ Colonne I11 (enquêteur) absente de la base.")
 
         with tab3:
             nb_incomp = int((stats_grappes["nb_menages"] < 15).sum())
