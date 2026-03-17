@@ -231,7 +231,6 @@ st.markdown("""
   border-color: rgba(0,0,0,0.1) !important;
   margin: 0.75rem 0 !important;
 }
-/* Sidebar file uploader */
 [data-testid="stSidebar"] [data-testid="stFileUploader"] {
   background: rgba(255,255,255,0.6) !important;
   border: 1.5px dashed rgba(13,47,94,0.25) !important;
@@ -241,11 +240,9 @@ st.markdown("""
   border-color: var(--primary-light) !important;
   background: rgba(255,255,255,0.85) !important;
 }
-/* Sidebar checkbox */
 [data-testid="stSidebar"] [data-testid="stCheckbox"] label {
   color: #2D2B28 !important;
 }
-/* Sidebar success messages */
 [data-testid="stSidebar"] .stSuccess {
   background: rgba(5,150,105,0.1) !important;
   border: 1px solid rgba(5,150,105,0.3) !important;
@@ -603,7 +600,6 @@ def display_searchable_dataframe(df, key_suffix="", height=450):
 # FONCTIONS UTILITAIRES
 # =============================================================================
 def load_spss_data(uploaded_file):
-    """Charge un fichier SPSS (sans cache car on stocke dans session_state)"""
     try:
         df, meta = pyreadstat.read_sav(uploaded_file)
         df = df.replace({None: np.nan})
@@ -754,7 +750,7 @@ def calculate_employment_indicators(df: pd.DataFrame) -> pd.DataFrame:
     return x
 
 # =============================================================================
-# SIDEBAR — Import unique avec persistance session_state
+# SIDEBAR
 # =============================================================================
 with st.sidebar:
     if _logo_b64:
@@ -763,9 +759,6 @@ with st.sidebar:
     st.markdown("**ANSADE -- Mauritanie**")
     st.markdown("---")
 
-    # ═══════════════════════════════════════════════════════════════════
-    # Navigation par boutons stylisés
-    # ═══════════════════════════════════════════════════════════════════
     st.markdown("**Module d'analyse**")
 
     MODULES = {
@@ -779,7 +772,7 @@ with st.sidebar:
         if st.button(
             f"{m['icon']}  {m['label']}",
             key=f"nav_{key}",
-            use_container_width=True,
+            width='stretch',
             type="primary" if is_active else "secondary"
         ):
             st.session_state.active_module = key
@@ -795,7 +788,6 @@ with st.sidebar:
 
     st.markdown("**📂 Bases de données**")
 
-    # --- Base Ménage ---
     if st.session_state.df_menage is not None:
         st.success(f"✅ Ménage : **{st.session_state.menage_filename}**")
         if st.button("🗑️ Supprimer base ménage", key="del_menage"):
@@ -812,7 +804,6 @@ with st.sidebar:
                 st.session_state.menage_filename = uploaded_menage.name
                 st.rerun()
 
-    # --- Base Emploi ---
     if st.session_state.df_emploi is not None:
         st.success(f"✅ Emploi : **{st.session_state.emploi_filename}**")
         if st.button("🗑️ Supprimer base emploi", key="del_emploi"):
@@ -920,32 +911,90 @@ if module == "📋 Exhaustivité":
         with tab1:
             col1, col2 = st.columns(2)
 
+            # ── Graphique 1 : Ménages par Équipe ──────────────────────────────
             with col1:
                 st.markdown("### Ménages par Équipe")
-                top_menages = stats_equipes.sort_values("nb_menages", ascending=False).head(15)
+                men_sorted = stats_equipes.sort_values("I10", ascending=True).copy()
+                men_sorted["code_str"] = men_sorted["I10"].apply(lambda x: str(int(x)))
                 fig = px.bar(
-                    top_menages, x="nb_menages", y="I10",
-                    orientation='h', color="nb_menages",
-                    color_continuous_scale="Blues", text="nb_menages"
+                    men_sorted, x="code_str", y="nb_menages",
+                    color="nb_menages",
+                    color_continuous_scale=[
+                        [0.0,  "#cce4f6"],
+                        [0.33, "#5aace3"],
+                        [0.66, "#1a6db5"],
+                        [1.0,  "#0a2d6e"],
+                    ],
+                    text="nb_menages"
                 )
-                fig.update_traces(texttemplate='%{text:,}', textposition='outside')
-                fig.update_layout(height=400, showlegend=False,
-                                  xaxis_title="Nombre de Ménages", yaxis_title="Équipe",
-                                  yaxis={'categoryorder': 'total ascending'})
+                fig.update_traces(
+                    texttemplate='%{text:,}',
+                    textposition='outside',
+                    marker_line_width=0,
+                )
+                fig.update_layout(
+                    height=420,
+                    showlegend=False,
+                    coloraxis_showscale=False,
+                    xaxis_title="Équipe",
+                    yaxis_title="Nombre de Ménages",
+                    xaxis=dict(
+                        tickfont=dict(size=12),
+                        tickmode='array',
+                        tickvals=men_sorted["code_str"].tolist(),
+                        ticktext=men_sorted["code_str"].tolist(),
+                        categoryorder='array',
+                        categoryarray=men_sorted["code_str"].tolist(),
+                    ),
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    margin=dict(l=40, r=20, t=40, b=40),
+                )
+                fig.update_xaxes(showgrid=False, showline=False, zeroline=False)
+                fig.update_yaxes(showgrid=False, showline=False, zeroline=False)
                 st.plotly_chart(fig, width='stretch')
 
+            # ── Graphique 2 : Grappes par Équipe ──────────────────────────────
             with col2:
                 st.markdown("### Grappes par Équipe")
-                top_grappes = stats_equipes.sort_values("nb_grappes", ascending=False).head(15)
+                gr_sorted = stats_equipes.sort_values("I10", ascending=True).copy()
+                gr_sorted["code_str"] = gr_sorted["I10"].apply(lambda x: str(int(x)))
                 fig = px.bar(
-                    top_grappes, x="nb_grappes", y="I10",
-                    orientation='h', color="nb_grappes",
-                    color_continuous_scale="Greens", text="nb_grappes"
+                    gr_sorted, x="code_str", y="nb_grappes",
+                    color="nb_grappes",
+                    color_continuous_scale=[
+                        [0.0,  "#c8ecd7"],
+                        [0.33, "#52b87a"],
+                        [0.66, "#1a7d45"],
+                        [1.0,  "#0a3d21"],
+                    ],
+                    text="nb_grappes"
                 )
-                fig.update_traces(texttemplate='%{text:,}', textposition='outside')
-                fig.update_layout(height=400, showlegend=False,
-                                  xaxis_title="Nombre de Grappes", yaxis_title="Équipe",
-                                  yaxis={'categoryorder': 'total ascending'})
+                fig.update_traces(
+                    texttemplate='%{text:,}',
+                    textposition='outside',
+                    marker_line_width=0,
+                )
+                fig.update_layout(
+                    height=420,
+                    showlegend=False,
+                    coloraxis_showscale=False,
+                    xaxis_title="Équipe",
+                    yaxis_title="Nombre de Grappes",
+                    xaxis=dict(
+                        tickfont=dict(size=12),
+                        tickmode='array',
+                        tickvals=gr_sorted["code_str"].tolist(),
+                        ticktext=gr_sorted["code_str"].tolist(),
+                        categoryorder='array',
+                        categoryarray=gr_sorted["code_str"].tolist(),
+                    ),
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    margin=dict(l=40, r=20, t=40, b=40),
+                )
+                fig.update_xaxes(showgrid=False, showline=False, zeroline=False)
+                fig.update_yaxes(showgrid=False, showline=False, zeroline=False)
                 st.plotly_chart(fig, width='stretch')
 
             st.markdown("### Distribution des Ménages par Grappe")
@@ -1104,16 +1153,29 @@ elif module == "💼 Emploi":
                     t_part=("t_part", "mean"),
                     r_emploi=("r_emploi", "mean"),
                     t_chomage=("t_chomage", "mean")
-                ).reset_index().sort_values("Effectif", ascending=False)
+                ).reset_index().sort_values("I10", ascending=True)
+                indic_equipe["code_str"] = indic_equipe["I10"].apply(lambda x: str(int(x)))
 
                 fig = go.Figure()
-                fig.add_trace(go.Bar(name="Taux participation", x=indic_equipe["I10"], y=indic_equipe["t_part"], marker_color="#667eea"))
-                fig.add_trace(go.Bar(name="Ratio emploi", x=indic_equipe["I10"], y=indic_equipe["r_emploi"], marker_color="#10b981"))
-                fig.add_trace(go.Bar(name="Taux chômage", x=indic_equipe["I10"], y=indic_equipe["t_chomage"], marker_color="#f59e0b"))
+                fig.add_trace(go.Bar(name="Taux participation", x=indic_equipe["code_str"], y=indic_equipe["t_part"], marker_color="#667eea", marker_line_width=0))
+                fig.add_trace(go.Bar(name="Ratio emploi", x=indic_equipe["code_str"], y=indic_equipe["r_emploi"], marker_color="#10b981", marker_line_width=0))
+                fig.add_trace(go.Bar(name="Taux chômage", x=indic_equipe["code_str"], y=indic_equipe["t_chomage"], marker_color="#f59e0b", marker_line_width=0))
 
                 fig.update_layout(
-                    barmode="group", height=400,
+                    barmode="group", height=420,
                     xaxis_title="Équipe", yaxis_title="Taux (%)",
+                    plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                    margin=dict(l=40, r=20, t=40, b=40),
+                    xaxis=dict(
+                        tickmode='array',
+                        tickvals=indic_equipe["code_str"].tolist(),
+                        ticktext=indic_equipe["code_str"].tolist(),
+                        categoryorder='array',
+                        categoryarray=indic_equipe["code_str"].tolist(),
+                        tickfont=dict(size=12),
+                        showgrid=False, showline=False, zeroline=False,
+                    ),
+                    yaxis=dict(showgrid=False, showline=False, zeroline=False),
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
                 )
                 st.plotly_chart(fig, width='stretch')
@@ -1143,9 +1205,6 @@ elif module == "💼 Emploi":
                     height=400
                 )
 
-            # ─────────────────────────────────────────────────────
-            # Tableau Indicateurs par Enquêteur
-            # ─────────────────────────────────────────────────────
             if "I11" in df_age.columns and len(df_age) > 0:
                 st.markdown("---")
                 st.markdown("### 🧑‍💼 Indicateurs par Enquêteur")
@@ -1178,7 +1237,6 @@ elif module == "💼 Emploi":
                 ]
                 cols_enq = [c for c in cols_enq if c in display_enq.columns]
 
-                # Graphique par enquêteur
                 top20_enq = indic_enqueteur.sort_values("Effectif", ascending=False).head(20).copy()
                 top20_enq["label"] = top20_enq.apply(
                     lambda x: f"Éq.{int(x['I10'])} - {get_label_enqueteur(x['I11']).split(' ')[0]} ({int(x['I11'])})", axis=1
@@ -1196,7 +1254,6 @@ elif module == "💼 Emploi":
                 )
                 st.plotly_chart(fig, width='stretch')
 
-                # Tableau avec recherche
                 df_enq_display = display_searchable_dataframe(
                     display_enq[cols_enq],
                     key_suffix="enqueteurs_indic_tab1",
@@ -1227,7 +1284,6 @@ elif module == "💼 Emploi":
                     height=450
                 )
 
-                # Export CSV
                 csv_enq = display_enq[cols_enq].to_csv(index=False).encode('utf-8')
                 st.download_button(
                     label="📥 Télécharger Indicateurs par Enquêteur (CSV)",
@@ -1350,7 +1406,6 @@ elif module == "💼 Emploi":
                         return [''] * len(row)
 
                     df_to_display = display_searchable_dataframe(display_men_final, key_suffix="menages_duree", height=420)
-                    
                     styled_df = df_to_display.style.apply(style_menage_row, axis=1)
                     st.dataframe(
                         styled_df.format({
@@ -1457,7 +1512,6 @@ elif module == "💼 Emploi":
                         return [''] * len(row)
 
                     df_to_display = display_searchable_dataframe(display_emp_final, key_suffix="emploi_duree", height=420)
-                    
                     styled_df = df_to_display.style.apply(style_emploi_row, axis=1)
                     st.dataframe(
                         styled_df.format({
@@ -1559,13 +1613,9 @@ elif module == "💼 Emploi":
                     fig.update_layout(height=500, showlegend=False, yaxis={'categoryorder': 'total ascending'})
                     st.plotly_chart(fig, width='stretch')
 
-                # ─────────────────────────────────────────────────────
-                # Tableau détaillé par individu (Occupés)
-                # ─────────────────────────────────────────────────────
                 st.markdown("---")
                 st.markdown("### 📋 Détail des Branches d'Activité par Individu")
 
-                # Labels AP2AC1
                 LABELS_AP2AC1 = {
                     "A01001": "Cultures de céréales", "A01002": "Culture de légumes frais",
                     "A01003": "Culture de fruits", "A01004": "Autres cultures",
@@ -1634,25 +1684,20 @@ elif module == "💼 Emploi":
                     "U19000": "Correction territoriale",
                 }
 
-                # br est déjà filtré sur Occupe == 1
                 br_ap3 = br.copy()
                 st.caption(f"🔎 Filtre : Occupé = 1 → **{len(br_ap3):,}** individus occupés")
 
                 if len(br_ap3) > 0:
-                    # Construction du tableau
                     display_br = br_ap3.copy()
 
-                    # Label branche
                     if "AP2AC1" in display_br.columns:
                         display_br["Libellé Branche"] = display_br["AP2AC1"].astype(str).map(LABELS_AP2AC1).fillna("—")
 
-                    # Nom équipe / enquêteur
                     if "I10" in display_br.columns:
                         display_br["Nom Équipe"] = display_br["I10"].apply(lambda x: get_label_equipe(x) if pd.notna(x) else "")
                     if "I11" in display_br.columns:
                         display_br["Nom Enquêteur"] = display_br["I11"].apply(lambda x: get_label_enqueteur(x) if pd.notna(x) else "")
 
-                    # Colonnes à afficher
                     cols_br = []
                     for c in ["idmen", "idind", "I10", "Nom Équipe", "I11", "Nom Enquêteur", "AP2A", "AP2AC1", "Libellé Branche", "AP2AC"]:
                         if c in display_br.columns:
@@ -1684,7 +1729,6 @@ elif module == "💼 Emploi":
                     else:
                         st.dataframe(df_br_display, width='stretch', height=500)
 
-                    # Export CSV
                     csv_br = display_br_final.to_csv(index=False).encode('utf-8')
                     st.download_button(
                         label="📥 Télécharger Détail Branches (CSV)",
@@ -1718,41 +1762,41 @@ elif module == "💼 Emploi":
                              color_discrete_map={"t_part": "#667eea", "r_emploi": "#10b981", "t_chomage": "#f59e0b"})
                 fig.update_layout(height=400, xaxis_tickangle=-30, xaxis_title="Strate", yaxis_title="Taux (%)")
                 st.plotly_chart(fig, width='stretch')
-            
+
             if "wilaya_label" in df.columns and len(df_age) > 0:
                 st.markdown("---")
                 st.markdown("### Indicateurs par Wilaya")
-                
+
                 indic_wilaya = df_age.groupby("wilaya_label").agg(
                     Effectif=("IND1", "count"),
                     t_part=("t_part", "mean"),
                     r_emploi=("r_emploi", "mean"),
                     t_chomage=("t_chomage", "mean")
                 ).reset_index().sort_values("Effectif", ascending=False)
-                
+
                 long_wilaya = indic_wilaya.melt(
                     id_vars=["wilaya_label"],
                     value_vars=["t_part", "r_emploi", "t_chomage"],
                     var_name="Indicateur",
                     value_name="Valeur"
                 )
-                
+
                 fig = px.bar(
-                    long_wilaya, 
-                    x="wilaya_label", 
-                    y="Valeur", 
+                    long_wilaya,
+                    x="wilaya_label",
+                    y="Valeur",
                     color="Indicateur",
                     barmode="group",
                     color_discrete_map={
-                        "t_part": "#667eea", 
-                        "r_emploi": "#10b981", 
+                        "t_part": "#667eea",
+                        "r_emploi": "#10b981",
                         "t_chomage": "#f59e0b"
                     }
                 )
                 fig.update_layout(
-                    height=450, 
-                    xaxis_tickangle=-45, 
-                    xaxis_title="Wilaya", 
+                    height=450,
+                    xaxis_tickangle=-45,
+                    xaxis_title="Wilaya",
                     yaxis_title="Taux (%)",
                     legend=dict(
                         title="Indicateur",
@@ -1764,10 +1808,10 @@ elif module == "💼 Emploi":
                     )
                 )
                 st.plotly_chart(fig, width='stretch')
-                
+
                 st.markdown("---")
                 st.markdown("### 📋 Tableau Détaillé par Wilaya")
-                
+
                 display_wilaya = indic_wilaya.copy()
                 display_wilaya = display_wilaya.rename(columns={
                     "wilaya_label": "Wilaya",
@@ -1775,17 +1819,17 @@ elif module == "💼 Emploi":
                     "r_emploi": "Ratio Emploi",
                     "t_chomage": "Taux Chômage"
                 })
-                
+
                 for col in ["Taux Part.", "Ratio Emploi", "Taux Chômage"]:
                     if col in display_wilaya.columns:
                         display_wilaya[col] = display_wilaya[col].round(1)
-                
+
                 df_to_display = display_searchable_dataframe(
                     display_wilaya[["Wilaya", "Effectif", "Taux Part.", "Ratio Emploi", "Taux Chômage"]],
                     key_suffix="wilaya_geo",
                     height=400
                 )
-                
+
                 st.dataframe(
                     df_to_display.style.format({
                         "Effectif": "{:.0f}",
@@ -1811,10 +1855,10 @@ elif module == "📊 Vue Consolidée":
     else:
         df_men = apply_filters(st.session_state.df_menage, filtrer_i9r)
         df_emp = apply_filters(st.session_state.df_emploi, filtrer_i9r)
-        
+
         df_emp = calculate_employment_indicators(df_emp)
         df_age = df_emp[df_emp["agetravail"] == 1].copy()
-        
+
         nb_menages = len(df_men)
         nb_grappes = df_men["I1"].nunique() if "I1" in df_men.columns else 0
         nb_individus = len(df_age)
@@ -1835,65 +1879,97 @@ elif module == "📊 Vue Consolidée":
 
         with tab1:
             st.markdown("### Progression de la Collecte par Équipe")
-            
+
             if "I10" in df_men.columns:
                 stats_equipes = df_men.groupby("I10").agg(
                     Ménages=("I2", "count"),
                     Grappes=("I1", "nunique")
                 ).reset_index()
-                
+
                 stats_equipes["Nom"] = stats_equipes["I10"].apply(lambda x: get_label_equipe(x))
                 stats_equipes = stats_equipes.rename(columns={"I10": "Code"})
-                
+
                 col1, col2 = st.columns(2)
-                
+
                 with col1:
                     st.markdown("#### Ménages Collectés")
+                    men_cons = stats_equipes.sort_values("Code", ascending=True).copy()
+                    men_cons["code_str"] = men_cons["Code"].apply(lambda x: str(int(x)))
                     fig = px.bar(
-                        stats_equipes.sort_values("Ménages", ascending=False).head(15),
-                        x="Ménages",
-                        y="Code",
-                        orientation="h",
+                        men_cons, x="code_str", y="Ménages",
                         color="Ménages",
-                        color_continuous_scale="Blues",
+                        color_continuous_scale=[
+                            [0.0,  "#cce4f6"],
+                            [0.33, "#5aace3"],
+                            [0.66, "#1a6db5"],
+                            [1.0,  "#0a2d6e"],
+                        ],
                         text="Ménages"
                     )
-                    fig.update_traces(texttemplate='%{text:,}', textposition='outside')
+                    fig.update_traces(texttemplate='%{text:,}', textposition='outside', marker_line_width=0)
                     fig.update_layout(
-                        height=450,
+                        height=420,
                         showlegend=False,
-                        yaxis={'categoryorder': 'total ascending'},
-                        xaxis_title="Nombre de Ménages",
-                        yaxis_title="Équipe"
+                        coloraxis_showscale=False,
+                        xaxis_title="Équipe",
+                        yaxis_title="Nombre de Ménages",
+                        xaxis=dict(
+                            tickfont=dict(size=12),
+                            tickmode='array',
+                            tickvals=men_cons["code_str"].tolist(),
+                            ticktext=men_cons["code_str"].tolist(),
+                            categoryorder='array',
+                            categoryarray=men_cons["code_str"].tolist(),
+                        ),
+                        plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                        margin=dict(l=40, r=20, t=40, b=40),
                     )
+                    fig.update_xaxes(showgrid=False, showline=False, zeroline=False)
+                    fig.update_yaxes(showgrid=False, showline=False, zeroline=False)
                     st.plotly_chart(fig, width='stretch')
-                
+
                 with col2:
                     st.markdown("#### Grappes Visitées")
+                    gr_cons = stats_equipes.sort_values("Code", ascending=True).copy()
+                    gr_cons["code_str"] = gr_cons["Code"].apply(lambda x: str(int(x)))
                     fig = px.bar(
-                        stats_equipes.sort_values("Grappes", ascending=False).head(15),
-                        x="Grappes",
-                        y="Code",
-                        orientation="h",
+                        gr_cons, x="code_str", y="Grappes",
                         color="Grappes",
-                        color_continuous_scale="Greens",
+                        color_continuous_scale=[
+                            [0.0,  "#c8ecd7"],
+                            [0.33, "#52b87a"],
+                            [0.66, "#1a7d45"],
+                            [1.0,  "#0a3d21"],
+                        ],
                         text="Grappes"
                     )
-                    fig.update_traces(texttemplate='%{text:,}', textposition='outside')
+                    fig.update_traces(texttemplate='%{text:,}', textposition='outside', marker_line_width=0)
                     fig.update_layout(
-                        height=450,
+                        height=420,
                         showlegend=False,
-                        yaxis={'categoryorder': 'total ascending'},
-                        xaxis_title="Nombre de Grappes",
-                        yaxis_title="Équipe"
+                        coloraxis_showscale=False,
+                        xaxis_title="Équipe",
+                        yaxis_title="Nombre de Grappes",
+                        xaxis=dict(
+                            tickfont=dict(size=12),
+                            tickmode='array',
+                            tickvals=gr_cons["code_str"].tolist(),
+                            ticktext=gr_cons["code_str"].tolist(),
+                            categoryorder='array',
+                            categoryarray=gr_cons["code_str"].tolist(),
+                        ),
+                        plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                        margin=dict(l=40, r=20, t=40, b=40),
                     )
+                    fig.update_xaxes(showgrid=False, showline=False, zeroline=False)
+                    fig.update_yaxes(showgrid=False, showline=False, zeroline=False)
                     st.plotly_chart(fig, width='stretch')
-                
+
                 st.markdown("---")
                 st.markdown("### 📋 Récapitulatif Détaillé par Équipe")
-                
+
                 stats_equipes["Moy/Grappe"] = (stats_equipes["Ménages"] / stats_equipes["Grappes"]).round(1)
-                
+
                 df_to_display = display_searchable_dataframe(
                     stats_equipes[["Code", "Nom", "Ménages", "Grappes", "Moy/Grappe"]],
                     key_suffix="consolidé_equipes"
@@ -1902,13 +1978,13 @@ elif module == "📊 Vue Consolidée":
 
         with tab2:
             st.markdown("### Indicateurs d'Emploi Consolidés")
-            
+
             if len(df_age) > 0:
                 col1, col2, col3 = st.columns(3)
-                
+
                 t_part = safe_mean(df_age["t_part"]) if "t_part" in df_age.columns else 0
                 r_emp = safe_mean(df_age["r_emploi"]) if "r_emploi" in df_age.columns else 0
-                
+
                 with col1:
                     fig = go.Figure(go.Indicator(
                         mode="gauge+number",
@@ -1924,14 +2000,10 @@ elif module == "📊 Vue Consolidée":
                         },
                         domain={'x': [0, 1], 'y': [0, 1]}
                     ))
-                    fig.update_layout(
-                        height=280,
-                        margin=dict(l=20, r=20, t=60, b=20),
-                        paper_bgcolor="rgba(0,0,0,0)",
-                        font={'family': "Inter"}
-                    )
+                    fig.update_layout(height=280, margin=dict(l=20, r=20, t=60, b=20),
+                                      paper_bgcolor="rgba(0,0,0,0)", font={'family': "Inter"})
                     st.plotly_chart(fig, width='stretch')
-                
+
                 with col2:
                     fig = go.Figure(go.Indicator(
                         mode="gauge+number",
@@ -1947,14 +2019,10 @@ elif module == "📊 Vue Consolidée":
                         },
                         domain={'x': [0, 1], 'y': [0, 1]}
                     ))
-                    fig.update_layout(
-                        height=280,
-                        margin=dict(l=20, r=20, t=60, b=20),
-                        paper_bgcolor="rgba(0,0,0,0)",
-                        font={'family': "Inter"}
-                    )
+                    fig.update_layout(height=280, margin=dict(l=20, r=20, t=60, b=20),
+                                      paper_bgcolor="rgba(0,0,0,0)", font={'family': "Inter"})
                     st.plotly_chart(fig, width='stretch')
-                
+
                 with col3:
                     fig = go.Figure(go.Indicator(
                         mode="gauge+number",
@@ -1970,60 +2038,46 @@ elif module == "📊 Vue Consolidée":
                         },
                         domain={'x': [0, 1], 'y': [0, 1]}
                     ))
-                    fig.update_layout(
-                        height=280,
-                        margin=dict(l=20, r=20, t=60, b=20),
-                        paper_bgcolor="rgba(0,0,0,0)",
-                        font={'family': "Inter"}
-                    )
+                    fig.update_layout(height=280, margin=dict(l=20, r=20, t=60, b=20),
+                                      paper_bgcolor="rgba(0,0,0,0)", font={'family': "Inter"})
                     st.plotly_chart(fig, width='stretch')
-                
+
                 if "I10" in df_age.columns:
                     st.markdown("---")
                     st.markdown("### 📊 Indicateurs par Équipe")
-                    
+
                     indic_equipe = df_age.groupby("I10").agg(
                         Effectif=("IND1", "count"),
                         t_part=("t_part", "mean"),
                         r_emploi=("r_emploi", "mean"),
                         t_chomage=("t_chomage", "mean")
-                    ).reset_index().sort_values("Effectif", ascending=False)
-                    
+                    ).reset_index().sort_values("I10", ascending=True)
+                    indic_equipe["code_str"] = indic_equipe["I10"].apply(lambda x: str(int(x)))
+
                     fig = go.Figure()
-                    fig.add_trace(go.Bar(
-                        name="Taux Participation",
-                        x=indic_equipe["I10"],
-                        y=indic_equipe["t_part"],
-                        marker_color="#667eea"
-                    ))
-                    fig.add_trace(go.Bar(
-                        name="Ratio Emploi",
-                        x=indic_equipe["I10"],
-                        y=indic_equipe["r_emploi"],
-                        marker_color="#10b981"
-                    ))
-                    fig.add_trace(go.Bar(
-                        name="Taux Chômage",
-                        x=indic_equipe["I10"],
-                        y=indic_equipe["t_chomage"],
-                        marker_color="#f59e0b"
-                    ))
-                    
+                    fig.add_trace(go.Bar(name="Taux Participation", x=indic_equipe["code_str"], y=indic_equipe["t_part"], marker_color="#667eea", marker_line_width=0))
+                    fig.add_trace(go.Bar(name="Ratio Emploi", x=indic_equipe["code_str"], y=indic_equipe["r_emploi"], marker_color="#10b981", marker_line_width=0))
+                    fig.add_trace(go.Bar(name="Taux Chômage", x=indic_equipe["code_str"], y=indic_equipe["t_chomage"], marker_color="#f59e0b", marker_line_width=0))
+
                     fig.update_layout(
-                        barmode="group",
-                        height=400,
-                        xaxis_title="Équipe",
-                        yaxis_title="Taux (%)",
-                        legend=dict(
-                            orientation="h",
-                            yanchor="bottom",
-                            y=1.02,
-                            xanchor="right",
-                            x=1
-                        )
+                        barmode="group", height=420,
+                        xaxis_title="Équipe", yaxis_title="Taux (%)",
+                        plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+                        margin=dict(l=40, r=20, t=40, b=40),
+                        xaxis=dict(
+                            tickmode='array',
+                            tickvals=indic_equipe["code_str"].tolist(),
+                            ticktext=indic_equipe["code_str"].tolist(),
+                            categoryorder='array',
+                            categoryarray=indic_equipe["code_str"].tolist(),
+                            tickfont=dict(size=12),
+                            showgrid=False, showline=False, zeroline=False,
+                        ),
+                        yaxis=dict(showgrid=False, showline=False, zeroline=False),
+                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
                     )
                     st.plotly_chart(fig, width='stretch')
-                    
+
                     st.markdown("---")
                     display_indic = indic_equipe.copy()
                     display_indic["Nom"] = display_indic["I10"].apply(lambda x: get_label_equipe(x))
@@ -2033,16 +2087,16 @@ elif module == "📊 Vue Consolidée":
                         "r_emploi": "Ratio Emploi",
                         "t_chomage": "Taux Chômage"
                     })
-                    
+
                     for col in ["Taux Part.", "Ratio Emploi", "Taux Chômage"]:
                         if col in display_indic.columns:
                             display_indic[col] = display_indic[col].round(1)
-                    
+
                     df_to_display = display_searchable_dataframe(
                         display_indic[["Code", "Nom", "Effectif", "Taux Part.", "Ratio Emploi", "Taux Chômage"]],
                         key_suffix="consolidé_indicateurs"
                     )
-                    
+
                     st.dataframe(
                         df_to_display.style.format({
                             "Code": "{:.0f}",
