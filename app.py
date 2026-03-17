@@ -1470,15 +1470,16 @@ elif module == "💼 Emploi":
                     )
 
                     st.markdown("---")
-                    st.markdown("### 📊 Top 15 Enquêteurs - % Questionnaire Ménages < 10 min")
+                    st.markdown("### 📊 Enquêteurs avec % Questionnaire Ménages < 10 min")
 
-                    top15_men = pct_men_rapide.head(15).copy()
-                    top15_men["label"] = top15_men.apply(
+                    chart_men = pct_men_rapide[pct_men_rapide["pct_moins_10min"] > 0].copy()
+                    chart_men = chart_men.sort_values("pct_moins_10min", ascending=True)
+                    chart_men["label"] = chart_men.apply(
                         lambda x: f"Équipe {int(x['I10'])} - Enq. {int(x['I11'])}", axis=1
                     )
 
                     fig = px.bar(
-                        top15_men,
+                        chart_men,
                         x="pct_moins_10min",
                         y="label",
                         orientation="h",
@@ -1486,12 +1487,19 @@ elif module == "💼 Emploi":
                         color_continuous_scale=["#10b981", "#fbbf24", "#f59e0b", "#ef4444"],
                         text="pct_moins_10min"
                     )
-                    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside', marker_line_width=0)
                     fig.update_layout(
-                        height=500, showlegend=False,
+                        height=min(500, max(300, len(chart_men) * 30 + 60)),
+                        showlegend=False,
+                        coloraxis_showscale=False,
                         xaxis_title="% Entretiens < 10 min",
                         yaxis_title="",
-                        yaxis={'categoryorder': 'total ascending'}
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        margin=dict(l=10, r=60, t=20, b=40),
+                        xaxis=dict(showgrid=False, showline=False, zeroline=False),
+                        yaxis=dict(showgrid=False, showline=False, zeroline=False,
+                                   tickfont=dict(size=11)),
                     )
                     fig.add_vline(x=30, line_dash="dash", line_color="#ef4444", line_width=2,
                                   annotation_text="Seuil: 30%", annotation_position="top right")
@@ -1576,15 +1584,16 @@ elif module == "💼 Emploi":
                     )
 
                     st.markdown("---")
-                    st.markdown("### Top 15 Enquêteurs - % Individu en Emplois ≤ 5 min")
+                    st.markdown("### Enquêteurs avec % Individu en Emplois ≤ 5 min ")
 
-                    top15_emp = pct_emploi_rapide.head(15).copy()
-                    top15_emp["label"] = top15_emp.apply(
+                    chart_emp = pct_emploi_rapide[pct_emploi_rapide["pct_moins_5min"] > 0].copy()
+                    chart_emp = chart_emp.sort_values("pct_moins_5min", ascending=True)
+                    chart_emp["label"] = chart_emp.apply(
                         lambda x: f"Équipe {int(x['I10'])} - Enq. {int(x['I11'])}", axis=1
                     )
 
                     fig = px.bar(
-                        top15_emp,
+                        chart_emp,
                         x="pct_moins_5min",
                         y="label",
                         orientation="h",
@@ -1592,12 +1601,19 @@ elif module == "💼 Emploi":
                         color_continuous_scale=["#10b981", "#fbbf24", "#f59e0b", "#ef4444"],
                         text="pct_moins_5min"
                     )
-                    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside', marker_line_width=0)
                     fig.update_layout(
-                        height=500, showlegend=False,
+                        height=min(500, max(300, len(chart_emp) * 30 + 60)),
+                        showlegend=False,
+                        coloraxis_showscale=False,
                         xaxis_title="% Entretiens ≤ 5 min",
                         yaxis_title="",
-                        yaxis={'categoryorder': 'total ascending'}
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        margin=dict(l=10, r=60, t=20, b=40),
+                        xaxis=dict(showgrid=False, showline=False, zeroline=False),
+                        yaxis=dict(showgrid=False, showline=False, zeroline=False,
+                                   tickfont=dict(size=11)),
                     )
                     fig.add_vline(x=30, line_dash="dash", line_color="#ef4444", line_width=2,
                                   annotation_text="Seuil: 30%", annotation_position="top right")
