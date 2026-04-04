@@ -1099,7 +1099,7 @@ if module == "📋 Exhaustivité":
                 return ''
 
             df_to_display = display_searchable_dataframe(display_grappes, key_suffix="grappes_tab3", height=500)
-            st.dataframe(df_to_display.style.applymap(color_status, subset=["Statut"]),
+            st.dataframe(df_to_display.style.map(color_status, subset=["Statut"]),
                          width='stretch', height=500)
 
         with tab4:
