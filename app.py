@@ -1206,12 +1206,12 @@ elif module == "💼 Emploi":
                 indic_equipe["code_str"] = indic_equipe["I10"].apply(lambda x: str(int(x)))
 
                 fig = go.Figure()
-                fig.add_trace(go.Bar(name="Taux participation", x=indic_equipe["code_str"], y=indic_equipe["t_part"], marker_color="#667eea", marker_line_width=0))
-                fig.add_trace(go.Bar(name="Ratio emploi", x=indic_equipe["code_str"], y=indic_equipe["r_emploi"], marker_color="#10b981", marker_line_width=0))
-                fig.add_trace(go.Bar(name="Taux chômage", x=indic_equipe["code_str"], y=indic_equipe["t_chomage"], marker_color="#f59e0b", marker_line_width=0))
+                fig.add_trace(go.Scatter(name="Taux participation", x=indic_equipe["code_str"], y=indic_equipe["t_part"], mode="lines+markers", line=dict(color="#667eea")))
+                fig.add_trace(go.Scatter(name="Ratio emploi", x=indic_equipe["code_str"], y=indic_equipe["r_emploi"], mode="lines+markers", line=dict(color="#10b981")))
+                fig.add_trace(go.Scatter(name="Taux chômage", x=indic_equipe["code_str"], y=indic_equipe["t_chomage"], mode="lines+markers", line=dict(color="#f59e0b")))
 
                 fig.update_layout(
-                    barmode="group", height=420,
+                    height=420,
                     xaxis_title="Équipe", yaxis_title="Taux (%)",
                     plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
                     margin=dict(l=40, r=20, t=40, b=40),
@@ -1292,11 +1292,11 @@ elif module == "💼 Emploi":
                 )
 
                 fig = go.Figure()
-                fig.add_trace(go.Bar(name="Taux Part.", x=top20_enq["label"], y=top20_enq["t_part"], marker_color="#667eea"))
-                fig.add_trace(go.Bar(name="Ratio Emploi", x=top20_enq["label"], y=top20_enq["r_emploi"], marker_color="#10b981"))
-                fig.add_trace(go.Bar(name="Taux Chômage", x=top20_enq["label"], y=top20_enq["t_chomage"], marker_color="#f59e0b"))
+                fig.add_trace(go.Scatter(name="Taux Part.", x=top20_enq["label"], y=top20_enq["t_part"], mode="lines+markers", line=dict(color="#667eea")))
+                fig.add_trace(go.Scatter(name="Ratio Emploi", x=top20_enq["label"], y=top20_enq["r_emploi"], mode="lines+markers", line=dict(color="#10b981")))
+                fig.add_trace(go.Scatter(name="Taux Chômage", x=top20_enq["label"], y=top20_enq["t_chomage"], mode="lines+markers", line=dict(color="#f59e0b")))
                 fig.update_layout(
-                    barmode="group", height=450,
+                    height=450,
                     xaxis_title="", yaxis_title="Taux (%)",
                     xaxis_tickangle=-45,
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
@@ -1822,8 +1822,8 @@ elif module == "💼 Emploi":
                     value_name="Valeur"
                 )
 
-                fig = px.bar(long, x="strate_label", y="Valeur", color="Indicateur",
-                             barmode="group",
+                fig = px.line(long, x="strate_label", y="Valeur", color="Indicateur",
+                             markers=True,
                              color_discrete_map={"t_part": "#667eea", "r_emploi": "#10b981", "t_chomage": "#f59e0b"})
                 fig.update_layout(height=400, xaxis_tickangle=-30, xaxis_title="Strate", yaxis_title="Taux (%)")
                 st.plotly_chart(fig, width='stretch')
@@ -1846,12 +1846,12 @@ elif module == "💼 Emploi":
                     value_name="Valeur"
                 )
 
-                fig = px.bar(
+                fig = px.line(
                     long_wilaya,
                     x="wilaya_label",
                     y="Valeur",
                     color="Indicateur",
-                    barmode="group",
+                    markers=True,
                     color_discrete_map={
                         "t_part": "#667eea",
                         "r_emploi": "#10b981",
@@ -2120,12 +2120,12 @@ elif module == "📊 Vue Consolidée":
                     indic_equipe["code_str"] = indic_equipe["I10"].apply(lambda x: str(int(x)))
 
                     fig = go.Figure()
-                    fig.add_trace(go.Bar(name="Taux Participation", x=indic_equipe["code_str"], y=indic_equipe["t_part"], marker_color="#667eea", marker_line_width=0))
-                    fig.add_trace(go.Bar(name="Ratio Emploi", x=indic_equipe["code_str"], y=indic_equipe["r_emploi"], marker_color="#10b981", marker_line_width=0))
-                    fig.add_trace(go.Bar(name="Taux Chômage", x=indic_equipe["code_str"], y=indic_equipe["t_chomage"], marker_color="#f59e0b", marker_line_width=0))
+                    fig.add_trace(go.Scatter(name="Taux Participation", x=indic_equipe["code_str"], y=indic_equipe["t_part"], mode="lines+markers", line=dict(color="#667eea")))
+                    fig.add_trace(go.Scatter(name="Ratio Emploi", x=indic_equipe["code_str"], y=indic_equipe["r_emploi"], mode="lines+markers", line=dict(color="#10b981")))
+                    fig.add_trace(go.Scatter(name="Taux Chômage", x=indic_equipe["code_str"], y=indic_equipe["t_chomage"], mode="lines+markers", line=dict(color="#f59e0b")))
 
                     fig.update_layout(
-                        barmode="group", height=420,
+                        height=420,
                         xaxis_title="Équipe", yaxis_title="Taux (%)",
                         plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
                         margin=dict(l=40, r=20, t=40, b=40),
